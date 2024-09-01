@@ -1,26 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="words.js"></script>
-        <title>Impostor Game</title>
-        <style>
-            #rectangle {
-            width: 200px;
-            height: 100px;
-            background-color: lightgray;
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="words.js"></script>
+    <title>Impostor Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #rectangle {
+            width: 300px;
+            height: 80px;
+            background-color: #6200ea;
+            color: white;
             text-align: center;
-            line-height: 100px;
+            line-height: 80px;
             cursor: pointer;
-            }
-        </style>
-    </head>
-    <body>
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        #rectangle:hover {
+            background-color: #3700b3;
+        }
+        #wordDisplay {
+            font-size: 24px;
+            color: #333;
+            visibility: hidden;
+            margin-bottom: 20px;
+        }
+        #playerInput {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 5px;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+            margin-bottom: 5px;
+        }
+        #errorLabel {
+            color: red;
+            font-size: 14px;
+            visibility: hidden;
+            margin-bottom: 20px;
+        }
+        #startMessage {
+            font-size: 24px;
+            color: green;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+        #restartButton {
+            width: 150px;
+            height: 50px;
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+            visibility: hidden;
+            margin-top: 20px;
+        }
+        #restartButton:hover {
+            background-color: #e64a19;
+        }
+        #rulesButton {
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+        }
+        #rulesButton:hover {
+            background-color: #0056b3;
+        }
+        #rules {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            width: 250px;
+            text-align: left;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
 
-        <script>
+    <input id="playerInput" type="number" placeholder="Número de jugadores" min="1">
+    <label id="errorLabel">Requerido</label>
+    <div id="rectangle">Empezar</div>
+    <div id="wordDisplay"></div>
+    <div id="startMessage">¡Que comience el juego!</div>
+    <div id="restartButton">Volver a jugar</div>
+    <div id="rulesButton">?</div>
+    <div id="rules">Reglas del juego:<br>1. Ingrese el número de jugadores.<br>2. Cada jugador ve la palabra excepto el impostor.<br>3. El impostor debe adivinar la palabra que los demás jugadores vieron.</div>
 
+    <script>
         const impostorWord = 'Impostor';
+        let currentPlayer = 0;
+        let numPlayers;
+        let impostorIndex;
+        let commonWord;
 
         // Función para obtener una palabra aleatoria
         function getRandomWord(wordArray) {
@@ -28,30 +135,92 @@
             return wordArray[index];
         }
 
-        // Función para mostrar la palabra al hacer click
-        function startRound(numPlayers) {
-            const commonWord = getRandomWord(commonWords);
-            const impostorIndex = Math.floor(Math.random() * numPlayers);
+        // Función para iniciar la ronda
+        function startRound() {
+            commonWord = getRandomWord(commonWords);
+            impostorIndex = Math.floor(Math.random() * numPlayers);
+            currentPlayer = 0;
 
-            for (let i = 0; i < numPlayers; i++) {  // Cambiado a 0-indexado
-                alert('Haz click para ver la palabra');
-                const word = (i === impostorIndex) ? impostorWord : commonWord;
-                alert(word);
+            showNextWord();
+            document.getElementById('restartButton').style.visibility = 'visible'; // Mostrar botón de reiniciar
+        }
+
+        // Función para mostrar la palabra al siguiente jugador
+        function showNextWord() {
+            const rectangle = document.getElementById('rectangle');
+            const wordDisplay = document.getElementById('wordDisplay');
+            if (currentPlayer < numPlayers) {
+                rectangle.textContent = 'Jugador ' + (currentPlayer + 1) + ': Click para ver la palabra';
+                wordDisplay.style.visibility = 'hidden';
+            } else {
+                rectangle.textContent = 'Todos han visto la palabra';
+                wordDisplay.textContent = '';
+                wordDisplay.style.visibility = 'hidden';
+                document.getElementById('startMessage').style.visibility = 'visible';
             }
         }
 
-        // Crear el rectángulo
-        const rectangle = document.createElement('div');
-        rectangle.id = 'rectangle';
-        rectangle.textContent = 'Empezar';
-        rectangle.addEventListener('click', function() {
-            const numPlayers = prompt('Ingrese el número de jugadores:');
-            startRound(parseInt(numPlayers));
+        // Validar número de jugadores
+        function validatePlayers() {
+            const playerInput = document.getElementById('playerInput');
+            const errorLabel = document.getElementById('errorLabel');
+            const value = parseInt(playerInput.value);
+            if (isNaN(value) || value <= 0) {
+                playerInput.style.borderColor = 'red';
+                errorLabel.style.visibility = 'visible';
+                return false;
+            } else {
+                playerInput.style.borderColor = 'transparent';
+                errorLabel.style.visibility = 'hidden';
+                numPlayers = value;
+                return true;
+            }
+        }
+
+        // Mostrar/ocultar reglas
+        function toggleRules() {
+            const rulesElement = document.getElementById('rules');
+            if (rulesElement.style.display === 'none') {
+                rulesElement.style.display = 'block';
+            } else {
+                rulesElement.style.display = 'none';
+            }
+        }
+
+        document.getElementById('rectangle').addEventListener('click', function() {
+            const playerInput = document.getElementById('playerInput');
+            if (!numPlayers) {
+                if (validatePlayers()) {
+                    playerInput.disabled = true;
+                    document.getElementById('startMessage').style.visibility = 'hidden';
+                    startRound();
+                }
+            } else {
+                const wordDisplay = document.getElementById('wordDisplay');
+                if (wordDisplay.style.visibility === 'hidden' && currentPlayer < numPlayers) {
+                    const word = (currentPlayer === impostorIndex) ? impostorWord : commonWord;
+                    wordDisplay.textContent = word;
+                    wordDisplay.style.visibility = 'visible';
+                    document.getElementById('rectangle').textContent = 'Jugador ' + (currentPlayer + 1) + ': Click para ocultar';
+                } else if (currentPlayer < numPlayers) {
+                    wordDisplay.style.visibility = 'hidden';
+                    currentPlayer++;
+                    showNextWord();
+                }
+            }
         });
 
-        // Agregar el rectángulo al cuerpo del documento
-        document.body.appendChild(rectangle);
+        document.getElementById('restartButton').addEventListener('click', function() {
+            const playerInput = document.getElementById('playerInput');
+            playerInput.disabled = false;
+            numPlayers = null;
+            playerInput.value = '';
+            document.getElementById('rectangle').textContent = 'Empezar';
+            document.getElementById('restartButton').style.visibility = 'hidden';
+            document.getElementById('startMessage').style.visibility = 'hidden';
+        });
 
-        </script>
-    </body>
+        document.getElementById('rulesButton').addEventListener('click', toggleRules);
+    </script>
+</body>
 </html>
