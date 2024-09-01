@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="words.js"></script>
+        <title>Impostor Game</title>
+        <style>
+            #rectangle {
+            width: 200px;
+            height: 100px;
+            background-color: lightgray;
+            text-align: center;
+            line-height: 100px;
+            cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+
+        <script>
+
+        const impostorWord = 'Impostor';
+
+        // Función para obtener una palabra aleatoria
+        function getRandomWord(wordArray) {
+            const index = Math.floor(Math.random() * wordArray.length);
+            return wordArray[index];
+        }
+
+        // Función para mostrar la palabra al hacer click
+        function startRound(numPlayers) {
+            const commonWord = getRandomWord(commonWords);
+            const impostorIndex = Math.floor(Math.random() * numPlayers);
+
+            for (let i = 0; i < numPlayers; i++) {  // Cambiado a 0-indexado
+                alert('Haz click para ver la palabra');
+                const word = (i === impostorIndex) ? impostorWord : commonWord;
+                alert(word);
+            }
+        }
+
+        // Crear el rectángulo
+        const rectangle = document.createElement('div');
+        rectangle.id = 'rectangle';
+        rectangle.textContent = 'Empezar';
+        rectangle.addEventListener('click', function() {
+            const numPlayers = prompt('Ingrese el número de jugadores:');
+            startRound(parseInt(numPlayers));
+        });
+
+        // Agregar el rectángulo al cuerpo del documento
+        document.body.appendChild(rectangle);
+
+        </script>
+    </body>
+</html>
